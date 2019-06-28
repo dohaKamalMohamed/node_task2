@@ -5,7 +5,7 @@ require('express-async-errors');
 const body_parser = require('body-parser');
 const cors = require('cors');
 const errors=require('../middleware/handleError');
-const resetPassword=require('../routes/reset_password')
+
 
 
 module.exports = function (app) {
@@ -14,6 +14,5 @@ module.exports = function (app) {
     app.use('/api/users', user);
     app.use('/api/auth', auth);
     app.use('/api/article', article);
-    app.use('/api/resetPassword', resetPassword);
     app.use(errors); 
 }

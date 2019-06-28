@@ -2,8 +2,7 @@ const express=require('express');
 const router=express.Router();
 const joi = require('joi');
 const {User}=require('../models/users');
-const jwt=require('jsonwebtoken');
-const config=require('config');
+
 const bcrypt=require('bcrypt');
 
 router.post('',async (req,res)=>{
@@ -20,8 +19,8 @@ router.post('',async (req,res)=>{
      return  res.status(404).send('invalid email or password');
     }
 
-    const token=jwt.sign({_id:this._id,isAdmin:this.isAdmin},config.get('jwtprivatekey'));
-    res.header('x-auth-token', token).send(token);
+    const token=user.generateToken();
+    res.header('x-auth-token', token).send(user.isAdmin);
 
 });
 

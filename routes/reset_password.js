@@ -3,9 +3,16 @@ const router=express.Router();
 const joi = require('joi');
 const {User}=require('../models/users');
 const bcrypt=require('bcrypt');
-const jwt=require('jsonwebtoken');
-const config=require('config');
 const _ =require('lodash');
+
+
+router.get('/token', async (req,res)=>{
+    let user= await User.findOne({_id:req.params.id});
+    if(!user){
+        return res.status(404).send('this user is not exist');
+    }
+    res.send(user);
+});
 
 
 router.put('/:id',async (req,res)=>{
@@ -33,7 +40,7 @@ router.put('/:id',async (req,res)=>{
         return res.status(404).send('this user is not exist');
     }
  
-    const token=jwt.sign({_id:this._id,isAdmin:this.isAdmin},config.get('jwtprivatekey'));
+    const token=user.generateToken();
     res.header('x-auth-token', token).send(token);
 });
 

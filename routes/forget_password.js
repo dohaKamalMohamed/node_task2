@@ -3,6 +3,7 @@ const router=express.Router();
 const nodemailer=require('nodemailer');
 const {User}=require('../models/users');
 
+
 router.post('/',async (req,res)=>{
 
     const {error} =validate(req.body);
@@ -15,39 +16,33 @@ router.post('/',async (req,res)=>{
         return res.status(404).send('invalid email');
     };
 
-    async function main(){
 
-      
-        let transporter = nodemailer.createTransport({
-          host: "smtp.ethereal.email",
-          port: 587,
-          secure: false, 
-          auth: {
-           email: user.email, 
-            pass: testAccount.pass ,
-          }
-        });
-      
-        // send mail with defined transport object
-        let info = await transporter.sendMail({
-          from: '"Fred Foo 👻" <foo@example.com>', // sender address
-          to: req.body.email, // list of receivers
-          subject: "Hello ✔", // Subject line
-          text: "Hello world?", // plain text body
-          html: "<b>Hello world?</b>" // html body
-        });
-      
-        console.log("Message sent: %s", info.messageId);
-        // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-      
-        // Preview only available when sending through an Ethereal account
-        console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-        // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
+    var transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'dohakamalelzrka94@gmail.com',
+        pass: '123456'
       }
-      
-      main().catch(console.error);
-
-
+    });
+    const token=user.generateToken();
+    const url=`https://localhost:4000/api/forgetPassword${token}`
+    
+    var mailOptions = {
+      from: 'dohakamalelzrka94@gmail.com',
+      to: user,
+      subject: 'verfication link',
+      text: `'click link to reset your password' ${url}`,
+    };
+    
+    transporter.sendMail(mailOptions, function(error, info){
+      if (error) {
+        console.log(error);
+      } else {
+        console.log('Email sent: ' + info.response);
+      }
+    });
+    return res.redirect('/reset-password')   
+ 
 });
 
 function validate(req) {
