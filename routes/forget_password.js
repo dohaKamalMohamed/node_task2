@@ -2,6 +2,9 @@ const express=require('express');
 const router=express.Router();
 const {User}=require('../models/users');
 const nodemailer=require('nodemailer');
+const joi = require('joi');
+const jwt=require('jsonwebtoken');
+const config=require('config');
     //node mailer function 
 function sendemail(email,token){
   const transporter =nodemailer.createTransport({
@@ -33,14 +36,31 @@ function sendemail(email,token){
 }
  // end of nodemailer function
 
-module.exports=function(req,res){
-     let user =  User.findOne({email:req.body.email});
+ router.post('/',async (req,res)=>{
+
+  const {error} =validate(req.body);
+    if(error){
+        return res.status(400).send(error.details[0].message);
+    };
+
+     let user = await User.findOne({email:req.body.email});
      if(!user){
-       return res.json({status:false,message:'invalid email address'})
+       return res.json({status:false,message:'invalid email address'});
      }else {
-      user.resetpassword=user.generateToken();
-      user.save();
+      user.resetpassword=jwt.sign({_id:user._id ,isAdmin :user.isAdmin,email:user.email},config.get('jwtprivatekey'));
+       await user.save();
       sendemail(user.email,user.resetpassword);
       return res.json({status:true,message:'check your email please'}) 
      }
+});
+
+function validate(req) {
+  const schema = {
+      email: joi.string().required().min(3).max(225).email({ minDomainAtoms: 2 }),
+  }
+  return joi.validate(req, schema);
 }
+
+module.exports=router;
+
+
