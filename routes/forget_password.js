@@ -1,54 +1,46 @@
 const express=require('express');
 const router=express.Router();
-const nodemailer=require('nodemailer');
 const {User}=require('../models/users');
-
-
-router.post('/',async (req,res)=>{
-
-    const {error} =validate(req.body);
+const nodemailer=require('nodemailer');
+    //node mailer function 
+function sendemail(email,token){
+  const transporter =nodemailer.createTransport({
+   host:'localhost:4000/task',
+   port:'4000',
+   secure:true,
+   auth:{
+     user:'dohakamalelzrka94@gmail.com',
+     pass:'doha_back1994'
+   }
+  });
+  let mailOptions={
+    from:'doha',
+    to:email,
+    subject:'verification link',
+    text:'welcome to my web site',
+    html:`<h1> welcome</h1><a href="http://localhost:4200/resetpassword/${token}">please click this link</a>`
+  };
+  transporter.sendMail(mailOptions,(error,info)=>{
+    console.log('here we sent message');
     if(error){
-        return res.send(400).send(error.details[0].message);
-    };
-   
-    const user = await User.findOne({ email: req.body.email });
-    if (!user) {
-        return res.status(404).send('invalid email');
-    };
-
-
-    var transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: 'dohakamalelzrka94@gmail.com',
-        pass: '123456'
-      }
-    });
-    const token=user.generateToken();
-    const url=`https://localhost:4000/api/forgetPassword${token}`
-    
-    var mailOptions = {
-      from: 'dohakamalelzrka94@gmail.com',
-      to: user,
-      subject: 'verfication link',
-      text: `'click link to reset your password' ${url}`,
-    };
-    
-    transporter.sendMail(mailOptions, function(error, info){
-      if (error) {
-        console.log(error);
-      } else {
-        console.log('Email sent: ' + info.response);
-      }
-    });
-    return res.redirect('/reset-password')   
- 
-});
-
-function validate(req) {
-    const schema = {
-        email: joi.string().required().min(3).max(225).email({ minDomainAtoms: 2 }),
+      console.log(error);
+    } else{
+      console.log('message sent',info);
+      console.log('preview URL',nodemailer.getTestMessageUrl(info));
     }
-    return joi.validate(req, schema);
+    transporter.close();
+  });
 }
-module.exports=router;
+ // end of nodemailer function
+
+module.exports=function(req,res){
+     let user =  User.findOne({email:req.body.email});
+     if(!user){
+       return res.json({status:false,message:'invalid email address'})
+     }else {
+      user.resetpassword=user.generateToken();
+      user.save();
+      sendemail(user.email,user.resetpassword);
+      return res.json({status:true,message:'check your email please'}) 
+     }
+}

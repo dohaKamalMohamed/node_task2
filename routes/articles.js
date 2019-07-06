@@ -7,7 +7,7 @@ const admin=require('../middleware/adminAuthorization');
 
 
 
-router.get('/',auth, async (req, res) => {
+router.get('/',[auth,admin], async (req, res) => {
     let articles = await Article.find();
     res.send(articles);
 });
@@ -20,7 +20,7 @@ router.get('/:id', async (req, res) => {
     res.send(article);
 });
 
-router.post('/',[auth,admin], async (req, res) => {
+router.post('/',admin, async (req, res) => {
     const { error } = validate(req.body);
     if (error) {
         return res.send(400).send(error.details[0].message);
@@ -35,7 +35,7 @@ router.post('/',[auth,admin], async (req, res) => {
 
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id',admin, async (req, res) => {
 
     const { error } = validate(req.body);
     if (error) {
@@ -56,7 +56,7 @@ router.put('/:id', async (req, res) => {
 });
 
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id',admin, async (req, res) => {
 
     let article = await Article.findOneAndDelete({ _id: req.params.id });
 

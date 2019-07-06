@@ -2,10 +2,9 @@ const express=require('express');
 const router=express.Router();
 const joi = require('joi');
 const {User}=require('../models/users');
-
 const bcrypt=require('bcrypt');
 
-router.post('',async (req,res)=>{
+router.post('/',async (req,res)=>{
     const {error} =validate(req.body);
     if(error){
         return res.status(400).send(error.details[0].message);
@@ -20,7 +19,7 @@ router.post('',async (req,res)=>{
     }
 
     const token=user.generateToken();
-    res.header('x-auth-token', token).send(user.isAdmin);
+    res.header('x-auth-token', token).send(token);
 
 });
 

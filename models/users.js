@@ -43,14 +43,13 @@ const userSchema = new mongoose.Schema({
         minlength: 4,
         maxlength: 1024,
     },
-    confirmPassword: {
-        type: String,
-        required: true,
-    },
-
     isAdmin: {
         type: Boolean,
         default:false
+    },
+    resetpassword:{
+        type: String,
+        required: false,
     },
     creationDate: {
         type: Date,
@@ -60,7 +59,7 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.methods.generateToken=function(){
-    const token=jwt.sign({_id:this._id ,isAdmin :this.isAdmin},config.get('jwtprivatekey'));
+    const token=jwt.sign({_id:this._id ,isAdmin :this.isAdmin,email:this.email},config.get('jwtprivatekey'));
     return token;
 }
 
@@ -87,8 +86,8 @@ function validateUser(user) {
             password:joi.string()
                  .required()
                  .regex(/^([a-z0-9A-Z]*)$/),
-            confirmPassword:joi.string()
-                  .required(),
+                 resetpassword:joi.string()
+                 .regex(/^([a-z0-9A-Z]*)$/),
             isAdmin:joi.boolean(),      
         });
     return joi.validate(user, schema);
