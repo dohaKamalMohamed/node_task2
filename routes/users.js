@@ -43,7 +43,6 @@ router.post('/',async (req,res)=>{
        'password',
        'resetpassword',
        'isAdmin',
-       'token',
     ]));
 
     const salt= await bcrypt.genSalt(10);
@@ -51,11 +50,11 @@ router.post('/',async (req,res)=>{
     await user.save();
 
     const token=user.generateToken();
-    res.header('x-auth-token', token).send(_.pick(user,[
+    res.header('x-auth-token', token).send(_.pick(req.user,[
        'userName',
        'email',
        'phoneNumber',
-       'isAdmin'
+       'isAdmin',
     ]));
 
 });
